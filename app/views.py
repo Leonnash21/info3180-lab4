@@ -8,6 +8,7 @@ import os
 from app import app
 from flask import render_template, request, redirect, url_for, flash, session, abort, jsonify
 from werkzeug.utils import secure_filename
+from flask import send_from_directory
 
 
 ###
@@ -26,7 +27,22 @@ def about():
     return render_template('about.html', name="Mary Jane")
     
     
-
+@app.route('/filelisting/',methods =['POST','GET'])
+def filelisting():
+    if not session.get('logged_in'):
+        abort(401)
+    return render_template('uploads.html', docs=get_list())
+    
+    
+def get_list():
+    docs = []
+    for subdir, dirs, files in os.walk(app.config['UPLOAD_FOLDER']):
+        for file in files:
+            if not file.startswith('.'):
+                docs.append(file)
+    return docs
+     
+ 
 @app.route('/add-file', methods=['POST', 'GET'])
 def add_file():
     if not session.get('logged_in'):
